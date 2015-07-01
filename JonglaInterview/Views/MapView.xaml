@@ -1,0 +1,65 @@
+﻿<Window x:Name="mainWindow" x:Class="JonglaInterview.Views.MapView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:m="clr-namespace:Microsoft.Maps.MapControl.WPF;assembly=Microsoft.Maps.MapControl.WPF"
+        xmlns:local="clr-namespace:JonglaInterview.ViewModels"
+        Title="Jongla - Interview Demo" Height="968.975" Width="868">
+    <Window.DataContext>
+        <local:MapViewModel/>
+    </Window.DataContext>
+
+    <DockPanel x:Name="dockPanelMain" Margin="0">
+        <DockPanel x:Name="dockPanelList" Margin="0" DockPanel.Dock="Top">
+            <GroupBox Header="List Selection Mode" DockPanel.Dock="Left" Height="64" VerticalAlignment="Top" Width="180">
+                <StackPanel>
+                    <RadioButton x:Name="rbtListSelectionModeSingle" Content="Single selection" GroupName="ListSelectionMode" IsChecked="True" 
+                                 Command="{Binding ListSelectionModeCommand}" CommandParameter="SingleSelectionMode"/>
+                    <RadioButton x:Name="rbtListSelectionModeMultiple" Content="Multiple selection" GroupName="ListSelectionMode"
+                                 Command="{Binding ListSelectionModeCommand}" CommandParameter="MultipleSelectionMode"/>
+                </StackPanel>
+            </GroupBox>
+            
+            <ListView x:Name="lstViewVehicles" DockPanel.Dock="Right" Margin="0" ItemsSource="{Binding Vehicles}" Grid.Column="4" Height="279"
+                      SelectionMode="{Binding ListSelectionModeStringValue}" SelectedItem="{Binding SelectedVehicle}">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Width="120" DisplayMemberBinding="{Binding VehicleRef}">
+                            <GridViewColumn.Header>
+                                <GridViewColumnHeader Tag="VehicleRef">Vehicle</GridViewColumnHeader>
+                            </GridViewColumn.Header>
+                        </GridViewColumn>
+                        <GridViewColumn Width="80" DisplayMemberBinding="{Binding LineRef}">
+                            <GridViewColumn.Header>
+                                <GridViewColumnHeader Tag="LineRef">Line</GridViewColumnHeader>
+                            </GridViewColumn.Header>
+                        </GridViewColumn>
+                        <GridViewColumn Width="80" DisplayMemberBinding="{Binding Latitude}">
+                            <GridViewColumn.Header>
+                                <GridViewColumnHeader Tag="Latitude">Latitude</GridViewColumnHeader>
+                            </GridViewColumn.Header>
+                        </GridViewColumn>
+                        <GridViewColumn Width="80" DisplayMemberBinding="{Binding Longitude}">
+                            <GridViewColumn.Header>
+                                <GridViewColumnHeader Tag="Longitude">Longitude</GridViewColumnHeader>
+                            </GridViewColumn.Header>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+
+        </DockPanel>
+        <m:Map x:Name="bingMap" 
+			ZoomLevel="11"
+			Center="60.207922, 24.930111"
+			CredentialsProvider="AkfYxz_sQ3jbl4gc7mrj9aByQMIZ6vrWTIA6sqay6BhN00EZ3Ep3Nifx2IPlh0Um" DockPanel.Dock="Top">
+            <m:MapItemsControl ItemsSource="{Binding SelectedVehicleLocation}">
+                <m:MapItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <m:Pushpin Location="{Binding Location, Mode=OneWay}"/>
+                    </DataTemplate>
+                </m:MapItemsControl.ItemTemplate>
+            </m:MapItemsControl>
+        </m:Map>
+    </DockPanel>
+
+</Window>
