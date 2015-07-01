@@ -125,7 +125,6 @@ namespace JonglaInterview.ViewModels
                 {
                     //have selected vehicle moved?
                     bool selectedLocationChanged = false;
-                    /*
                     if (SelectedVehicle != null
                         && SelectedVehicle.VehicleRef == ((Vehicle)e.Data[s]).VehicleRef
                         && (SelectedVehicle.Longitude != ((Vehicle)e.Data[s]).Longitude
@@ -133,8 +132,6 @@ namespace JonglaInterview.ViewModels
                     {
                         selectedLocationChanged = true;
                     } 
-                    
-                     */
 
                     ((Vehicle)_vehicles[s]).LineRef = ((Vehicle)e.Data[s]).LineRef;
                     ((Vehicle)_vehicles[s]).Longitude = ((Vehicle)e.Data[s]).Longitude;
@@ -143,11 +140,9 @@ namespace JonglaInterview.ViewModels
                     //change location of selected vehicle if has been moved
                     if (selectedLocationChanged)
                     {
-                        /*
                         List<Vehicle> vl = new List<Vehicle>();
                         vl.Add(SelectedVehicle);
                         SelectedVehicleLocation = vl;
-                         * */
                     }
                 }
             }
@@ -175,8 +170,8 @@ namespace JonglaInterview.ViewModels
         }
 
         protected const string SelectedVehicleProperty = "SelectedVehicle"; 
-        private List<Vehicle> _selectedVehicle;
-        public List<Vehicle> SelectedVehicle
+        private Vehicle _selectedVehicle;
+        public Vehicle SelectedVehicle
         {
             get { return _selectedVehicle; }
             set
@@ -184,11 +179,9 @@ namespace JonglaInterview.ViewModels
                 _selectedVehicle = value;
                 RaisePropertyChanged(SelectedVehicleProperty);
 
-                /*
                 List<Vehicle> vl = new List<Vehicle>();
                 vl.Add(_selectedVehicle);
                 SelectedVehicleLocation = vl;
-                 * */
             }
         }
 
