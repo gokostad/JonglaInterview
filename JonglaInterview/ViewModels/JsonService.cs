@@ -11,6 +11,7 @@ using System.IO;
 using JonglaInterview.Helpers;
 using JonglaInterview.Models;
 using JonglaInterview.Properties;
+using System.Diagnostics.Tracing;
 
 namespace JonglaInterview.ViewModels
 {
@@ -32,13 +33,20 @@ namespace JonglaInterview.ViewModels
                 taskRefreshModel = new Task(() => { RefreshModel(); });
                 taskRefreshModel.Start();
             }
+            else
+                resetEvent.Set();
         }
 
         public void Close()
         {
-            cancelTokensource.Cancel();
-            Thread.Sleep(100);
-            taskRefreshModel = null;
+            if (taskRefreshModel != null)
+            {
+                cancelTokensource.Cancel();
+                System.Diagnostics.Trace.TraceInformation("Closing JsonService");
+                taskRefreshModel.Wait();
+                System.Diagnostics.Trace.TraceInformation("JsonService Closed"); 
+                taskRefreshModel = null;
+            }
         }
 
         ~JsonService()
@@ -101,7 +109,14 @@ namespace JonglaInterview.ViewModels
                 } while (!resetEvent.Wait(Convert.ToInt32(Properties.Resources.MODEL_REFRESH_TIMEOUT), cancelTokensource.Token));
             }
             catch (OperationCanceledException)
-            { }
+            {
+                System.Diagnostics.Trace.TraceInformation("JsonService OperationCanceledException");
+            }
+            finally
+            {
+                taskRefreshModel = null;
+            }
+            System.Diagnostics.Trace.TraceInformation("JsonService Finished");
         }
 
     }
