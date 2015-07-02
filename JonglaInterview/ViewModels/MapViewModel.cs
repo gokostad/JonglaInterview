@@ -11,23 +11,29 @@ namespace JonglaInterview.ViewModels
 {
     public class MapViewModel : JonglaInterview.Helpers.ObservableObject
     {
-        private IDataService _service;
-        public IDataService Service 
+        IDataRefresher refresher;
+        public IDataRefresher Refresher
         {
-            get { return _service; } 
-            set
+            get { return refresher; }
+        }
+
+        public void InitializeLoader(IDataRefresher refresher, IDataService service, object serviceParam = null)
+        {
+            if (this.refresher != null)
             {
-                if (_service != null)
+                this.refresher.Stop();
+                this.refresher = null;
+            }
+            this.refresher = refresher;
+            if (this.refresher != null)
+            {
+                if (service != null)
                 {
-                    _service.Close();
+                    service.ModelAvailable += Service_ModelAvailable;
                 }
-                _service = value;
-                if (_service != null)
-                {
-                    _service.ModelAvailable += Service_ModelAvailable;
-                    Service.LoadData();
-                }
-            } 
+                this.refresher.Initialize(service, serviceParam);
+            }
+
         }
 
         private ICommand listSelectionModeCommand;

@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 
 using JonglaInterview.ViewModels;
 using JonglaInterview.Models;
+using JonglaInterview.Helpers;
 
 namespace JonglaInterview.Views
 {
@@ -32,15 +33,19 @@ namespace JonglaInterview.Views
         {
             base.OnActivated(e);
 
-            if (DataContext != null && ((MapViewModel)DataContext).Service == null)
-                ((MapViewModel)DataContext).Service = new JsonService();
+            if (DataContext != null && ((MapViewModel)DataContext).Refresher == null)
+            {
+                //for testing purpose, just change here refresher and/or service, easy to mockup
+                ((MapViewModel)DataContext).InitializeLoader(new TimerDataRefresher(), new JsonService());
+                ((IDataRefresher)((MapViewModel)DataContext).Refresher).Start();
+            }
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             base.OnClosing(e);
-            if (DataContext != null && ((MapViewModel)DataContext).Service != null)
-                ((MapViewModel)DataContext).Service = null;
+            if (DataContext != null && ((MapViewModel)DataContext).Refresher != null)
+                ((IDataRefresher) ((MapViewModel)DataContext).Refresher).Stop();
         }
     }
 }

@@ -18,40 +18,45 @@ namespace JonglaInterview.ViewModels
     public class JsonService : IDataService
     {
         public event ModelAvailableEventHandler ModelAvailable;
+        private WebClient syncClient = new WebClient();
+        private DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(RootObject));        
+        private RootObject rootObject;
 
-        Task taskRefreshModel = null;
-        CancellationTokenSource cancelTokensource = new CancellationTokenSource();
-        ManualResetEventSlim resetEvent = new ManualResetEventSlim();
-
-        public JsonService()
-        {}
-
+        public void Initialize(object param) { }
+        public void Close() { }
+       
         public void LoadData()
         {
-            if (taskRefreshModel == null)
-            {
-                taskRefreshModel = new Task(() => { RefreshModel(); });
-                taskRefreshModel.Start();
-            }
-            else
-                resetEvent.Set();
-        }
+            var content = syncClient.DownloadString(Properties.Resources.JSON_SOURCE_URL);
 
-        public void Close()
-        {
-            if (taskRefreshModel != null)
+            // Create the Json serializer and parse the response
+            using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(content)))
             {
-                cancelTokensource.Cancel();
-                System.Diagnostics.Trace.TraceInformation("Closing JsonService");
-                taskRefreshModel.Wait();
-                System.Diagnostics.Trace.TraceInformation("JsonService Closed"); 
-                taskRefreshModel = null;
+                rootObject = (RootObject)serializer.ReadObject(ms);
             }
-        }
 
-        ~JsonService()
-        {
-            Close();
+            Hashtable vehicles = new Hashtable();
+            foreach (VehicleMonitoringDelivery vehMonitoringActivity in rootObject.Siri.ServiceDelivery.VehicleMonitoringDelivery)
+            {
+                foreach (VehicleActivity vehActivity in vehMonitoringActivity.VehicleActivity)
+                {
+                    try
+                    {
+                        if (vehActivity.MonitoredVehicleJourney.VehicleLocation.Latitude != 0
+                            && vehActivity.MonitoredVehicleJourney.VehicleLocation.Longitude != 0)
+                            vehicles.Add(vehActivity.MonitoredVehicleJourney.VehicleRef.value,
+                                            Models.Vehicle.CreateVehicle(
+                                                vehActivity.MonitoredVehicleJourney.VehicleRef.value,
+                                                vehActivity.MonitoredVehicleJourney.LineRef.value,
+                                                vehActivity.MonitoredVehicleJourney.VehicleLocation.Latitude,
+                                                vehActivity.MonitoredVehicleJourney.VehicleLocation.Longitude));
+                    }
+                    catch
+                    { }
+                }
+            }
+
+            OnModelAvailable(new ModelAvailableEventArgs(vehicles));
         }
 
         protected virtual void OnModelAvailable(ModelAvailableEventArgs e)
@@ -61,63 +66,5 @@ namespace JonglaInterview.ViewModels
                 ModelAvailable(e);
             }
         }
-
-        private void RefreshModel()
-        {
-            WebClient syncClient = new WebClient();
-            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(RootObject));
-            RootObject rootObject;
-
-            try
-            {
-                do
-                {
-                    try
-                    {
-                        var content = syncClient.DownloadString(Properties.Resources.JSON_SOURCE_URL);
-
-                        // Create the Json serializer and parse the response
-                        using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(content)))
-                        {
-                            rootObject = (RootObject)serializer.ReadObject(ms);
-                        }
-
-                        Hashtable vehicles = new Hashtable();
-                        foreach (VehicleMonitoringDelivery vehMonitoringActivity in rootObject.Siri.ServiceDelivery.VehicleMonitoringDelivery)
-                        {
-                            foreach (VehicleActivity vehActivity in vehMonitoringActivity.VehicleActivity)
-                            {
-                                try
-                                {
-                                    if (vehActivity.MonitoredVehicleJourney.VehicleLocation.Latitude != 0
-                                        && vehActivity.MonitoredVehicleJourney.VehicleLocation.Longitude != 0)
-                                        vehicles.Add(vehActivity.MonitoredVehicleJourney.VehicleRef.value,
-                                                     Models.Vehicle.CreateVehicle(
-                                                         vehActivity.MonitoredVehicleJourney.VehicleRef.value,
-                                                         vehActivity.MonitoredVehicleJourney.LineRef.value,
-                                                         vehActivity.MonitoredVehicleJourney.VehicleLocation.Latitude,
-                                                         vehActivity.MonitoredVehicleJourney.VehicleLocation.Longitude));
-                                }
-                                catch
-                                { }
-                            }
-                        }
-
-                        OnModelAvailable(new ModelAvailableEventArgs(vehicles));
-                    }
-                    catch { }
-                } while (!resetEvent.Wait(Convert.ToInt32(Properties.Resources.MODEL_REFRESH_TIMEOUT), cancelTokensource.Token));
-            }
-            catch (OperationCanceledException)
-            {
-                System.Diagnostics.Trace.TraceInformation("JsonService OperationCanceledException");
-            }
-            finally
-            {
-                taskRefreshModel = null;
-            }
-            System.Diagnostics.Trace.TraceInformation("JsonService Finished");
-        }
-
     }
 }

@@ -9,8 +9,9 @@ namespace JonglaInterview.Helpers
     {
         event ModelAvailableEventHandler ModelAvailable;
 
-        void LoadData();
+        void Initialize(object param = null);
         void Close();
+        void LoadData();
     }
 
     public class ModelAvailableEventArgs : EventArgs
