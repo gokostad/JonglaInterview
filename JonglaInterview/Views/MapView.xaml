@@ -10,17 +10,20 @@
 
     <DockPanel x:Name="dockPanelMain" Margin="0">
         <DockPanel x:Name="dockPanelList" Margin="0" DockPanel.Dock="Top">
-            <GroupBox Header="List Selection Mode" DockPanel.Dock="Left" Height="64" VerticalAlignment="Top" Width="180">
+            <GroupBox Header="List Selection Mode" DockPanel.Dock="Left" Height="71" VerticalAlignment="Top" Width="180">
                 <StackPanel>
                     <RadioButton x:Name="rbtListSelectionModeSingle" Content="Single selection" GroupName="ListSelectionMode" IsChecked="True" 
                                  Command="{Binding ListSelectionModeCommand}" CommandParameter="SingleSelectionMode"/>
                     <RadioButton x:Name="rbtListSelectionModeMultiple" Content="Multiple selection" GroupName="ListSelectionMode"
                                  Command="{Binding ListSelectionModeCommand}" CommandParameter="MultipleSelectionMode"/>
+                    <RadioButton x:Name="rbtListSelectionModeExtended" Content="Extended selection" GroupName="ListSelectionMode"
+                                 Command="{Binding ListSelectionModeCommand}" CommandParameter="ExtendedSelectionMode"/>
                 </StackPanel>
             </GroupBox>
             
             <ListView x:Name="lstViewVehicles" DockPanel.Dock="Right" Margin="0" ItemsSource="{Binding Vehicles}" Grid.Column="4" Height="279"
-                      SelectionMode="{Binding ListSelectionModeStringValue}" SelectedItem="{Binding SelectedVehicle}">
+                      SelectionMode="{Binding ListSelectionMode}">
+                <!-- SelectedItem="{Binding SelectedVehicle}"-->
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Width="120" DisplayMemberBinding="{Binding VehicleRef}">

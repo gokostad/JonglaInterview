@@ -60,6 +60,10 @@
     <Compile Include="Helpers\EnumToStringConverter.cs" />
     <Compile Include="Helpers\IDataRefresher.cs" />
     <Compile Include="Helpers\IDataService.cs" />
+    <Compile Include="Helpers\IMultiSelectCollectionView.cs" />
+    <Compile Include="Helpers\ItemViewModel.cs" />
+    <Compile Include="Helpers\MultiSelect.cs" />
+    <Compile Include="Helpers\MultiSelectCollectionView.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Models\RootObject.cs" />
     <Compile Include="ViewModels\JsonService.cs" />

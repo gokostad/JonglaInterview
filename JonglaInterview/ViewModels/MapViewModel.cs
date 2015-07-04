@@ -6,6 +6,7 @@ using System.Linq;
 using JonglaInterview.Helpers;
 using JonglaInterview.Models;
 using System.Windows.Input;
+using System.Windows.Controls;
 
 namespace JonglaInterview.ViewModels
 {
@@ -58,12 +59,13 @@ namespace JonglaInterview.ViewModels
         public enum ListSelectionModeEnum
         {
             SingleSelectionMode,
-            MultipleSelectionMode
+            MultipleSelectionMode,
+            ExtendedSelectionMode
         };
 
-        protected const string ListSelectionModeStringValueProperty = "ListSelectionModeStringValue";
-        private ListSelectionModeEnum _listSelectionMode = ListSelectionModeEnum.SingleSelectionMode;
-        public ListSelectionModeEnum ListSelectionMode
+        protected const string ListSelectionModeProperty = "ListSelectionMode";
+        private SelectionMode _listSelectionMode = SelectionMode.Single;
+        public SelectionMode ListSelectionMode
         {
             get
             {
@@ -78,28 +80,26 @@ namespace JonglaInterview.ViewModels
                 }
 
                 this._listSelectionMode = value;
-                RaisePropertyChanged(ListSelectionModeStringValueProperty);
+                RaisePropertyChanged(ListSelectionModeProperty);
             }       
         }
-        public string ListSelectionModeStringValue
-        {
-            get 
-            { 
-                return _listSelectionMode == ListSelectionModeEnum.SingleSelectionMode ? "Single" : "Multiple";
-            }
-        }
-
 
         public void ExecuteListSelectionModeCommand(object obj)
         {
             switch (obj.ToString())
             {
                 case "SingleSelectionMode":
-                    ListSelectionMode = ListSelectionModeEnum.SingleSelectionMode;
+                    ListSelectionMode = SelectionMode.Single;
                     break;
+
                 case "MultipleSelectionMode":
-                    ListSelectionMode = ListSelectionModeEnum.MultipleSelectionMode;
+                    ListSelectionMode = SelectionMode.Multiple;
                     break;
+
+                case "ExtendedSelectionMode":
+                    ListSelectionMode = SelectionMode.Extended;
+                    break;
+
                 default:
                     break;
             }
@@ -107,12 +107,24 @@ namespace JonglaInterview.ViewModels
 
         public MapViewModel()
         {
-            VehiclesHash = new Hashtable();
+            VehiclesHash = new Hashtable() { 
+                {"1", Vehicle.CreateVehicle("1", "11", 1.1, 2.2)},
+                {"2", Vehicle.CreateVehicle("2", "11", 1.1, 2.2)},
+                {"3", Vehicle.CreateVehicle("3", "11", 1.1, 2.2)},
+                {"4", Vehicle.CreateVehicle("4", "11", 1.1, 2.2)}
+            };
             ListSelectionModeCommand = new RelayCommand(ExecuteListSelectionModeCommand, CanExecuteListSelectionModeCommand);
         }
 
+        static int CC = 10;
+
         public void Service_ModelAvailable(ModelAvailableEventArgs e)
         {
+            _vehicles.Add(CC.ToString(), Vehicle.CreateVehicle(CC.ToString(), CC.ToString(), 3.3, 3.3));
+            CC++;
+            ((Vehicle)_vehicles["2"]).Latitude += 1.0;
+            ((Vehicle)_vehicles["2"]).Longitude += 2.0;
+            /*
             List<string> keys = _vehicles.Keys.Cast<string>().ToList();
             
             //remove all vehicles not presented in new list
@@ -152,16 +164,19 @@ namespace JonglaInterview.ViewModels
                     }
                 }
             }
+             * */
             RaisePropertyChanged(VehiclesProperty);
         }
 
         protected const string VehiclesProperty = "Vehicles";
         private Hashtable _vehicles;
-        public List<Vehicle> Vehicles
+        private MultiSelectCollectionView<Vehicle> _mscvVehicles = null;
+        public MultiSelectCollectionView<Vehicle> Vehicles
         {
             get 
-            { 
-                return (List<Vehicle>)_vehicles.Values.Cast<Vehicle>().ToList(); 
+            {
+                return _mscvVehicles;
+                //return (List<Vehicle>)_vehicles.Values.Cast<Vehicle>().ToList(); 
             }
         }
 
@@ -171,6 +186,7 @@ namespace JonglaInterview.ViewModels
             set
             {
                 _vehicles = value;
+                _mscvVehicles = new MultiSelectCollectionView<Vehicle>((List<Vehicle>)_vehicles.Values.Cast<Vehicle>().ToList());
                 RaisePropertyChanged(VehiclesProperty);
             }
         }
