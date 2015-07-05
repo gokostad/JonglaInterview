@@ -64,6 +64,9 @@
     <Compile Include="Helpers\ItemViewModel.cs" />
     <Compile Include="Helpers\MultiSelect.cs" />
     <Compile Include="Helpers\MultiSelectCollectionView.cs" />
+    <Compile Include="Helpers\ObservableDictionary.cs" />
+    <Compile Include="Helpers\ObservableSortedDictionary.cs" />
+    <Compile Include="Helpers\ObservableStyleDictionary.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Models\RootObject.cs" />
     <Compile Include="ViewModels\JsonService.cs" />
